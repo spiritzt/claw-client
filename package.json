@@ -34,13 +34,13 @@
         }
       ],
       "icon": "assets/icon/icon.ico",
-      "artifactName": "肯登攀-${version}-Setup.${ext}"
+      "artifactName": "肯龙虾-${version}-Setup.${ext}"
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
-      "shortcutName": "肯登攀"
+      "shortcutName": "肯龙虾"
     },
     "mac": {
       "target": [
@@ -50,7 +50,7 @@
         }
       ],
       "icon": "assets/icon.icns",
-      "artifactName": "肯登攀-${version}.${ext}"
+      "artifactName": "肯龙虾-${version}.${ext}"
     },
     "extraResources": [
       {

@@ -56,7 +56,7 @@ export class CookieKeeper {
         // 有过期账号，通知用户
         if (expiredIds.length > 0) {
             new Notification({
-                title: '肯登攀 - 登录过期',
+                title: '肯龙虾 - 登录过期',
                 body: `${expiredIds.length} 个账号需要重新扫码登录`,
             }).show();
 

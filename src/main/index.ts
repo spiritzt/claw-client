@@ -20,7 +20,7 @@ function createMainWindow() {
         minHeight: 700,
         show: false,
         autoHideMenuBar: true,
-        title: '肯登攀',
+        title: '肯龙虾',
         icon: path.join(__dirname, '..', 'assets', 'icon', 'icon.ico'),
         webPreferences: {
             preload: path.join(__dirname, '..', 'preload', 'index.js'),
@@ -30,6 +30,11 @@ function createMainWindow() {
     });
     mainWindow.maximize();
     mainWindow.show();
+
+    // mainWindow.webContents.on('did-finish-load', () => {
+    //     // @ts-ignore
+    //     mainWindow.setTitle("肯龙虾");
+    // });
 
     mainWindow.loadURL(SYSTEM_URL);
 
@@ -54,7 +59,7 @@ app.whenReady().then(async () => {
     const expired = results.filter(r => !r.valid);
     if (expired.length > 0) {
         new Notification({
-            title: '肯登攀 - 账号提醒',
+            title: '肯龙虾 - 账号提醒',
             body: `${expired.length} 个抖音账号登录已过期，请重新扫码登录`,
         }).show();
 
