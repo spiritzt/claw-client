@@ -5,7 +5,7 @@ import { PublishEngine } from './publish-engine';
 import { CookieKeeper } from './cookie-keeper';
 import { registerDomInspector } from './dom-inspector';
 
-const SYSTEM_URL = 'https://www.kindpo.com';
+const SYSTEM_URL = 'http://localhost';
 
 let mainWindow: BrowserWindow | null = null;
 const accountManager = new AccountManager();
@@ -18,13 +18,18 @@ function createMainWindow() {
         height: 900,
         minWidth: 1200,
         minHeight: 700,
+        show: false,
+        autoHideMenuBar: true,
         title: '肯登攀',
+        icon: path.join(__dirname, '..', 'assets', 'icon', 'icon.ico'),
         webPreferences: {
             preload: path.join(__dirname, '..', 'preload', 'index.js'),
             contextIsolation: true,
             nodeIntegration: false,
         },
     });
+    mainWindow.maximize();
+    mainWindow.show();
 
     mainWindow.loadURL(SYSTEM_URL);
 
