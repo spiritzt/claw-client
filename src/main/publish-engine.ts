@@ -27,8 +27,6 @@ const SELECTORS = {
     videoFileInput: 'input[type="file"][accept*="video"]',
     coverFileInput: 'input[type="file"][accept*="image"]',
     descriptionEditor: 'div[contenteditable="true"][class*="editor-comp-publish"]',
-    publishButtonTop: 'button[class*="header-button"]',
-    publishButtonBottom: 'button[class*="primary"][class*="button"]',
     uploadArea: 'div[class*="upload-btn"]',
 };
 
@@ -170,26 +168,20 @@ export class PublishEngine {
 
             // ===== 7. 点击发布 =====
             await randomDelay(2000, 4000);
-            console.log(`[${accountId}] 点击发布按钮`);
+            console.log(`[${accountId}] Clicking publish button`);
             const clickResult = await win.webContents.executeJavaScript(`
-        (function() {
-          // 优先点击底部发布按钮
-          const btnBottom = document.querySelector(${JSON.stringify(SELECTORS.publishButtonBottom)});
-          if (btnBottom && btnBottom.innerText.trim() === '发布') {
-            btnBottom.click();
-            return { clicked: 'bottom', text: btnBottom.innerText.trim() };
-          }
- 
-          // 备用：顶部高清发布按钮
-          const btnTop = document.querySelector(${JSON.stringify(SELECTORS.publishButtonTop)});
-          if (btnTop) {
-            btnTop.click();
-            return { clicked: 'top', text: btnTop.innerText.trim() };
-          }
- 
-          return { clicked: null, text: '' };
-        })()
-      `);
+    (function() {
+        const buttons = document.querySelectorAll('button');
+        for (const btn of buttons) {
+            const text = btn.innerText.trim();
+            if (text === '发布') {
+                btn.click();
+                return { clicked: 'publish', text: text };
+            }
+        }
+        return { clicked: null, text: '' };
+    })()
+`);
 
             if (!clickResult.clicked) {
                 return { accountId, success: false, message: '未找到发布按钮' };

@@ -110,6 +110,22 @@ export class AccountManager {
         });
     }
 
+    // createHiddenWindow(accountId: string): BrowserWindow | null {
+    //     const account = accounts.get(accountId);
+    //     if (!account) return null;
+    //
+    //     return new BrowserWindow({
+    //         show: true,        // ← 改成 true，临时调试
+    //         width: 1200,
+    //         height: 900,
+    //         webPreferences: {
+    //             partition: account.partition,
+    //             contextIsolation: true,
+    //             nodeIntegration: false,
+    //         },
+    //     });
+    // }
+
     /**
      * 获取账号的 session
      */
