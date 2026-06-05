@@ -1,0 +1,67 @@
+{
+  "name": "claw-client",
+  "version": "1.0.0",
+  "description": "肯登攀-多账号抖音自动发布客户端",
+  "main": "dist/main/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "npm run build && electron .",
+    "dev": "tsc -w & electron .",
+    "dev:reload": "tsc && electron . --enable-logging",
+    "pack": "electron-builder --dir",
+    "dist:win": "electron-builder --win",
+    "dist:mac": "electron-builder --mac",
+    "clean": "rm -rf dist release"
+  },
+  "keywords": ["douyin", "auto-publish", "electron"],
+  "author": "",
+  "license": "MIT",
+  "build": {
+    "appId": "com.kindpo.client",
+    "productName": "肯登攀",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "assets/**/*"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "assets/icon.ico",
+      "artifactName": "肯登攀-${version}-Setup.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "shortcutName": "肯登攀"
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["x64", "arm64"]
+        }
+      ],
+      "icon": "assets/icon.icns",
+      "artifactName": "肯登攀-${version}.${ext}"
+    },
+    "extraResources": [
+      {
+        "from": "assets",
+        "to": "assets"
+      }
+    ]
+  },
+  "devDependencies": {
+    "electron": "^42.3.3",
+    "electron-builder": "^26.8.1",
+    "typescript": "^6.0.3"
+  }
+}
