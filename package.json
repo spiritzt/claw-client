@@ -18,7 +18,7 @@
   "license": "MIT",
   "build": {
     "appId": "com.kindpo.client",
-    "productName": "肯登攀",
+    "productName": "肯龙虾",
     "directories": {
       "output": "release"
     },
