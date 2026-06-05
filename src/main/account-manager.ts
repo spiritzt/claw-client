@@ -186,7 +186,7 @@ export class AccountManager {
 
         accounts.set(accountId, {
             id: accountId,
-            name: '',
+            name: 'spirit',
             avatar: '',
             partition,
             loginValid: true,
