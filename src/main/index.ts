@@ -1,13 +1,16 @@
-import { app, BrowserWindow, ipcMain, session, shell, Notification } from 'electron';
+import { app, BrowserWindow, ipcMain, session, shell, Notification, Tray, Menu, nativeImage } from 'electron';
 import * as path from 'path';
 import { AccountManager } from './account-manager';
 import { PublishEngine } from './publish-engine';
 import { CookieKeeper } from './cookie-keeper';
 import { registerDomInspector } from './dom-inspector';
+import {exitIconBase64} from "./exitIcon";
 
 const SYSTEM_URL = 'http://localhost';
 
 let mainWindow: BrowserWindow | null = null;
+let tray;
+let isQuitting = false;
 const accountManager = new AccountManager();
 const publishEngine = new PublishEngine(accountManager);
 const cookieKeeper = new CookieKeeper(accountManager);
@@ -46,6 +49,36 @@ function createMainWindow() {
     mainWindow.on('closed', () => {
         mainWindow = null;
     });
+
+    mainWindow.on('close', (event) => {
+        // 如果标志位为 false，说明只是点了右上角的 X，阻止关闭并隐藏
+        if (!isQuitting) {
+            event.preventDefault();
+            // @ts-ignore
+            mainWindow.hide();
+        }
+        // 如果标志位为 true，说明是触发了真正的退出流程，放行关闭
+    });
+}
+
+function createTray() {
+    const iconBase64: any = exitIconBase64;
+    const icon = nativeImage.createFromDataURL(`data:image/png;base64,${iconBase64}`);
+    tray = new Tray(icon);
+    const contextMenu = Menu.buildFromTemplate([
+        { label: '显示窗口', click: () => {
+            // @ts-ignore
+            mainWindow.show()
+            }
+        },
+        { type: 'separator' },
+        // 👇 3. 在托盘菜单中点击退出时，先修改标志位，再调用 quit
+        { label: '退出', click: () => {
+                isQuitting = true;
+                app.quit();
+            }}
+    ]);
+    tray.setContextMenu(contextMenu);
 }
 
 app.whenReady().then(async () => {
@@ -53,6 +86,7 @@ app.whenReady().then(async () => {
     accountManager.loadAccounts();
 
     createMainWindow();
+    createTray();
 
     // 启动时检查所有账号登录态
     const results = await accountManager.checkAllLoginStatus();
@@ -88,6 +122,10 @@ app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
         app.quit();
     }
+});
+
+app.on('before-quit', () => {
+    isQuitting = true;
 });
 
 // ========== IPC 通信 ==========
