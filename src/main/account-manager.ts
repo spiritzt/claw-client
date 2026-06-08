@@ -5,7 +5,11 @@ import * as path from 'path';
 interface AccountInfo {
     id: string;
     name: string;
+    plateNumber: string;
+    nickname: string;
+    typename: string;
     avatar: string;
+    platform: string;
     partition: string;
     loginValid: boolean;
     lastChecked: number;
@@ -50,7 +54,7 @@ export class AccountManager {
     /**
      * 初始化账号 - 弹出扫码登录窗口
      */
-    async initAccount(accountId: string): Promise<{ success: boolean; message: string }> {
+    async initAccount(accountId: string, typeName: string, nickName: string): Promise<{ success: boolean; message: string }> {
         if (accounts.has(accountId)) {
             return { success: false, message: '账号已存在' };
         }
@@ -74,14 +78,14 @@ export class AccountManager {
         return new Promise((resolve) => {
             loginWin.webContents.on('did-navigate', (_event, url) => {
                 if (url.includes('creator-micro/home') || url.includes('creator-micro/content')) {
-                    this.handleLoginSuccess(accountId, partition, loginWin, resolve);
+                    this.handleLoginSuccess(accountId, partition, loginWin, typeName, nickName, resolve);
                 }
             });
 
             // 新增：SPA 内部路由跳转
             loginWin.webContents.on('did-navigate-in-page', (_event, url) => {
                 if (url.includes('creator-micro/home') || url.includes('creator-micro/content')) {
-                    this.handleLoginSuccess(accountId, partition, loginWin, resolve);
+                    this.handleLoginSuccess(accountId, partition, loginWin, typeName, nickName, resolve);
                 }
             });
 
@@ -192,19 +196,49 @@ export class AccountManager {
         return true;
     }
 
-    private handleLoginSuccess(
+    private async handleLoginSuccess(
         accountId: string,
         partition: string,
         win: BrowserWindow,
+        typeName: string,
+        nickName: string,
         resolve: (value: { success: boolean; message: string }) => void
     ) {
         if (accounts.has(accountId)) return; // 防止重复触发
 
+        await win.webContents.executeJavaScript(`
+            new Promise((resolve) => {
+                const check = () => {
+                    const name = document.querySelector('[class*="name"]')?.innerText?.trim();
+                    if (name) {
+                        resolve();
+                    } else {
+                        setTimeout(check, 500);
+                    }
+                };
+                check();
+            })
+        `);
+
+        const userInfo = await win.webContents.executeJavaScript(`
+            (function() {
+                const avatar = document.querySelector('[class*="avatar"] img')?.src || '';
+                const name = document.querySelector('[class*="name"]')?.innerText?.trim() || '';
+                const rawId = document.querySelector('[class*="unique_id"]')?.innerText?.trim() || '';
+                const douyinId = rawId.replace('抖音号：', '');
+                return { name, avatar, douyinId };
+            })()
+        `);
+
         accounts.set(accountId, {
             id: accountId,
-            name: '',
-            avatar: '',
+            name: userInfo.name,
+            plateNumber: userInfo.douyinId,
+            nickname: nickName,
+            typename: typeName,
+            avatar: userInfo.avatar,
             partition,
+            platform: "douyin",
             loginValid: true,
             lastChecked: Date.now(),
         });

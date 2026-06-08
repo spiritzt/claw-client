@@ -137,8 +137,8 @@ app.on('before-quit', () => {
 
 // ========== IPC 通信 ==========
 
-ipcMain.handle('account:init', async (_, accountId: string) => {
-    return accountManager.initAccount(accountId);
+ipcMain.handle('account:init', async (_, accountId: string, typeName: string, nickName: string) => {
+    return accountManager.initAccount(accountId, typeName, nickName);
 });
 
 ipcMain.handle('account:list', async () => {
