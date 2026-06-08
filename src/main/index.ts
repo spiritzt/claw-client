@@ -79,6 +79,13 @@ function createTray() {
             }}
     ]);
     tray.setContextMenu(contextMenu);
+
+    tray.on('click', () => {
+        if (mainWindow) {
+            // 如果窗口被隐藏了，就显示它并让它获得焦点
+            mainWindow.show();
+        }
+    });
 }
 
 app.whenReady().then(async () => {
