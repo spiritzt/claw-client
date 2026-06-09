@@ -8,7 +8,7 @@ const loginHandlers: Record<string, ILoginHandler> = {
 };
 
 const publishHandlers: Record<string, IPublishHandler> = {
-    douyin: new DouyinPublishHandler()
+    douyin: new DouyinPublishHandler(),
 };
 
 const heartbeatCheckers: Record<string, IHeartbeatChecker> = {
