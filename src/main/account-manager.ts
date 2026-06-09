@@ -230,6 +230,20 @@ export class AccountManager {
             })()
         `);
 
+        // 检查抖音号是否已存在
+        const existingAccount = Array.from(accounts.values()).find(
+            acc => acc.plateNumber === userInfo.douyinId
+        );
+
+        if (existingAccount) {
+            // 清除刚登录的 Session，等于退出登录
+            const ses = session.fromPartition(partition);
+            await ses.clearStorageData();
+            win.close();
+            resolve({ success: false, message: `抖音号 ${userInfo.douyinId} 已存在（账号：${existingAccount.id}），请勿重复添加` });
+            return;
+        }
+
         accounts.set(accountId, {
             id: accountId,
             name: userInfo.name,
