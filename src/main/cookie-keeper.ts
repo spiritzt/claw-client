@@ -39,8 +39,16 @@ export class CookieKeeper {
                 await win.loadURL('https://creator.douyin.com/creator-micro/home');
                 await new Promise(resolve => setTimeout(resolve, 3000));
 
-                const currentUrl = win.webContents.getURL();
-                account.loginValid = !currentUrl.includes('login');
+                const isValid = await win.webContents.executeJavaScript(`
+                    (function() {
+                        // 页面上有登录按钮/二维码，说明未登录
+                        const hasLoginBtn = !!document.querySelector('[class*="login"]');
+                        const hasLoginText = document.body.innerText.includes('登录') && 
+                                             !document.body.innerText.includes('登录过期');
+                        return !(hasLoginBtn || hasLoginText);
+                    })()
+                `);
+                account.loginValid = isValid;
                 account.lastChecked = Date.now();
 
                 if (!account.loginValid) {
