@@ -249,7 +249,7 @@ export class AccountManager {
             const ses = session.fromPartition(partition);
             await ses.clearStorageData();
             win.close();
-            resolve({ success: false, message: `抖音号 ${userInfo.douyinId} 已存在（账号：${existingAccount.id}），请勿重复添加` });
+            resolve({ success: false, message: `抖音号 ${userInfo.douyinId} 已存在，请勿重复添加` });
             return;
         }
 
