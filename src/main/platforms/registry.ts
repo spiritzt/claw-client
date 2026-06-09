@@ -2,17 +2,23 @@ import { PlatformType, ILoginHandler, IPublishHandler, IHeartbeatChecker } from 
 import { DouyinLoginHandler } from './douyin/login-handler';
 import { DouyinPublishHandler } from './douyin/publish-handler';
 import { DouyinHeartbeatChecker } from './douyin/heartbeat-handler';
+import { KuaishouLoginHandler } from './kuaishou/login-handler';
+import { KuaishouPublishHandler } from './kuaishou/publish-handler';
+import { KuaishouHeartbeatChecker } from './kuaishou/heartbeat-handler';
 
 const loginHandlers: Record<string, ILoginHandler> = {
     douyin: new DouyinLoginHandler(),
+    kuaishou: new KuaishouLoginHandler(),
 };
 
 const publishHandlers: Record<string, IPublishHandler> = {
     douyin: new DouyinPublishHandler(),
+    kuaishou: new KuaishouPublishHandler(),
 };
 
 const heartbeatCheckers: Record<string, IHeartbeatChecker> = {
     douyin: new DouyinHeartbeatChecker(),
+    kuaishou: new KuaishouHeartbeatChecker(),
 };
 
 const partitionPrefixes: Record<PlatformType, string> = {

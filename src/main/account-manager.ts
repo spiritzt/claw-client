@@ -1,4 +1,4 @@
-import { BrowserWindow, session, app } from 'electron';
+import {BrowserWindow, session, app, shell} from 'electron';
 import * as fs from 'fs';
 import * as path from 'path';
 import { AccountInfo, PlatformType } from './platforms/interfaces';
@@ -36,7 +36,7 @@ export class AccountManager {
     /**
      * 初始化账号 - 弹出扫码登录窗口
      */
-    async initAccount(accountId: string, typeName: string, nickName: string, platform: PlatformType = 'douyin'): Promise<{ success: boolean; message: string }> {
+    async initAccount(accountId: string, typeName: string, nickName: string, platform: PlatformType): Promise<{ success: boolean; message: string }> {
         if (accounts.has(accountId)) {
             return { success: false, message: '账号已存在' };
         }
@@ -46,16 +46,23 @@ export class AccountManager {
         const partition = `persist:${prefix}_${accountId}`;
 
         const loginWin = new BrowserWindow({
-            width: 1060,
+            width: 1360,
             height: 840,
-            title: '扫码登录抖音创作者中心',
+            title: '扫码登录抖',
             resizable: true,
+            show: false,
             webPreferences: {
                 partition,
                 contextIsolation: true,
                 nodeIntegration: false,
             },
         });
+        loginWin.maximize();
+        loginWin.show();
+
+        // loginWin.webContents.setUserAgent(
+        //     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0'
+        // );
 
         await loginWin.loadURL(loginHandler.loginUrl);
 
@@ -93,7 +100,7 @@ export class AccountManager {
                     });
 
                     this.saveAccounts();
-                    loginWin.close();
+                    // loginWin.close();
                     resolve({ success: true, message: '登录成功' });
                 } catch (e) {
                     console.error('Failed to get user info:', e);
@@ -150,7 +157,7 @@ export class AccountManager {
         const account = accounts.get(accountId);
         if (!account) return null;
 
-        return new BrowserWindow({
+        const win =  new BrowserWindow({
             show: false,
             width: 1200,
             height: 900,
@@ -160,6 +167,13 @@ export class AccountManager {
                 nodeIntegration: false,
             },
         });
+
+        // 伪装 User-Agent
+        // win.webContents.setUserAgent(
+        //     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0'
+        // );
+
+        return win;
     }
 
     showWindow(accountId: string, win: BrowserWindow): void {

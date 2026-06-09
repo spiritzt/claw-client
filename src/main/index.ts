@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, session, shell, Notification, Tray, Menu, nativeImage } from 'electron';
+import { app, BrowserWindow, ipcMain, session, shell, Notification, Tray, Menu, nativeImage, protocol } from 'electron';
 import * as path from 'path';
 import { AccountManager } from './account-manager';
 import { PublishEngine } from './publish-engine';
@@ -95,6 +95,8 @@ app.whenReady().then(async () => {
     createMainWindow();
     createTray();
 
+    registerDomInspector();
+
     // 启动时检查所有账号登录态
     const results = await accountManager.checkAllLoginStatus();
     const expired = results.filter(r => !r.valid);
@@ -114,8 +116,6 @@ app.whenReady().then(async () => {
 
     // 启动 Cookie 心跳
     cookieKeeper.start();
-
-    registerDomInspector();
 
     app.on('activate', () => {
         if (BrowserWindow.getAllWindows().length === 0) {
@@ -137,7 +137,7 @@ app.on('before-quit', () => {
 
 // ========== IPC 通信 ==========
 
-ipcMain.handle('account:init', async (_, accountId: string, typeName: string, nickName: string, platform: string = 'douyin') => {
+ipcMain.handle('account:init', async (_, accountId: string, typeName: string, nickName: string, platform: string) => {
     return accountManager.initAccount(accountId, typeName, nickName, platform as any);
 });
 
