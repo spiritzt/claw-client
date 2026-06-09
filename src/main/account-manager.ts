@@ -151,6 +151,10 @@ export class AccountManager {
 
         try {
             await win.loadURL('https://creator.douyin.com/creator-micro/home');
+
+            // 等待 SPA 路由跳转完成
+            await new Promise(resolve => setTimeout(resolve, 3000));
+
             const currentUrl = win.webContents.getURL();
 
             const isValid = !currentUrl.includes('login');
