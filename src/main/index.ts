@@ -137,12 +137,17 @@ app.on('before-quit', () => {
 
 // ========== IPC 通信 ==========
 
-ipcMain.handle('account:init', async (_, accountId: string, typeName: string, nickName: string) => {
-    return accountManager.initAccount(accountId, typeName, nickName);
+ipcMain.handle('account:init', async (_, accountId: string, typeName: string, nickName: string, platform: string = 'douyin') => {
+    return accountManager.initAccount(accountId, typeName, nickName, platform as any);
 });
 
 ipcMain.handle('account:reLogin', async (_, accountId: string, typeName: string, nickName: string) => {
     return accountManager.reLogin(accountId, typeName, nickName);
+});
+
+ipcMain.handle('account:reload', async () => {
+    accountManager.reloadAccounts();
+    return accountManager.listAccounts();
 });
 
 ipcMain.handle('account:list', async () => {
