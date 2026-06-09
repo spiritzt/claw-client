@@ -21,7 +21,6 @@ export function registerDomInspector(): void {
             height: 900,
             title: '调试',
             webPreferences: {
-
                 partition: `persist:${prefixes[platform] || 'dy'}_${accountId}`,
                 contextIsolation: true,
                 nodeIntegration: false,
