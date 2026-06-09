@@ -27,9 +27,9 @@ export function registerDomInspector(): void {
             },
         });
 
-        // win.webContents.setUserAgent(
-        //     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0'
-        // );
+        win.webContents.setUserAgent(
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        );
 
         await win.loadURL(urls[platform] || urls.douyin);
 

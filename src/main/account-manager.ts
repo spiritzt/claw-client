@@ -60,9 +60,11 @@ export class AccountManager {
         loginWin.maximize();
         loginWin.show();
 
-        // loginWin.webContents.setUserAgent(
-        //     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0'
-        // );
+        if (platform === 'kuaishou') {
+            loginWin.webContents.setUserAgent(
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+            );
+        }
 
         await loginWin.loadURL(loginHandler.loginUrl);
 
@@ -169,9 +171,11 @@ export class AccountManager {
         });
 
         // 伪装 User-Agent
-        // win.webContents.setUserAgent(
-        //     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0'
-        // );
+        if (account.platform === 'kuaishou') {
+            win.webContents.setUserAgent(
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+            );
+        }
 
         return win;
     }
