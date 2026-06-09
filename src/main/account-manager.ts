@@ -48,7 +48,7 @@ export class AccountManager {
         const loginWin = new BrowserWindow({
             width: 1360,
             height: 840,
-            title: '扫码登录抖',
+            title: '扫码登录',
             resizable: true,
             show: false,
             webPreferences: {
@@ -67,6 +67,10 @@ export class AccountManager {
         }
 
         await loginWin.loadURL(loginHandler.loginUrl);
+
+        // loginWin.on('close', (event) => {
+        //     event.preventDefault();
+        // });
 
         return new Promise((resolve) => {
             const handleLoginSuccess = async () => {
@@ -102,7 +106,7 @@ export class AccountManager {
                     });
 
                     this.saveAccounts();
-                    // loginWin.close();
+                    loginWin.close();
                     resolve({ success: true, message: '登录成功' });
                 } catch (e) {
                     console.error('Failed to get user info:', e);
