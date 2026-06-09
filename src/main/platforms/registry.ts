@@ -21,6 +21,7 @@ const partitionPrefixes: Record<PlatformType, string> = {
     xiaohongshu: 'xhs',
 };
 
+
 export function getLoginHandler(platform: PlatformType): ILoginHandler {
     return loginHandlers[platform];
 }
