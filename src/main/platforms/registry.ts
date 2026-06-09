@@ -18,7 +18,7 @@ const heartbeatCheckers: Record<string, IHeartbeatChecker> = {
 const partitionPrefixes: Record<PlatformType, string> = {
     douyin: 'dy',
     kuaishou: 'ks',
-    xiaohongshu: 'xhs'
+    xiaohongshu: 'xhs',
 };
 
 export function getLoginHandler(platform: PlatformType): ILoginHandler {
