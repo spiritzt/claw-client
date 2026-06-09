@@ -98,6 +98,32 @@ export class AccountManager {
     }
 
     /**
+     * 重新登录
+     */
+    async reLogin(accountId: string, typeName: string, nickName: string): Promise<{ success: boolean; message: string }> {
+        const oldAccount = accounts.get(accountId);
+        if (!oldAccount) {
+            return { success: false, message: '账号不存在' };
+        }
+
+        const backup = { ...oldAccount };
+
+        const ses = session.fromPartition(oldAccount.partition);
+        await ses.clearStorageData();
+        accounts.delete(accountId);
+        this.saveAccounts();
+
+        const result = await this.initAccount(accountId, typeName, nickName);
+
+        if (!result.success) {
+            accounts.set(accountId, backup);
+            this.saveAccounts();
+        }
+
+        return result;
+    }
+
+    /**
      * 创建隐藏窗口用于自动化操作
      */
     createHiddenWindow(accountId: string): BrowserWindow | null {

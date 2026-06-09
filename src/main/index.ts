@@ -141,6 +141,10 @@ ipcMain.handle('account:init', async (_, accountId: string, typeName: string, ni
     return accountManager.initAccount(accountId, typeName, nickName);
 });
 
+ipcMain.handle('account:reLogin', async (_, accountId: string, typeName: string, nickName: string) => {
+    return accountManager.reLogin(accountId, typeName, nickName);
+});
+
 ipcMain.handle('account:list', async () => {
     return accountManager.listAccounts();
 });
