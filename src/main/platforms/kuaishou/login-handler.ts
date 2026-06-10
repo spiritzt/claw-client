@@ -10,7 +10,7 @@ export class KuaishouLoginHandler implements ILoginHandler {
         await win.webContents.executeJavaScript(`
             new Promise((resolve) => {
                 const check = () => {
-                    const name = document.querySelector('[class*="user"], [class*="name"], [class*="nick"]')?.innerText?.trim();
+                    const name = document.querySelector('[class*="user-info"]')?.innerText?.trim() || '';
                     if (name) {
                         resolve();
                     } else {
@@ -23,8 +23,8 @@ export class KuaishouLoginHandler implements ILoginHandler {
 
         return await win.webContents.executeJavaScript(`
             (function() {
-                const name = document.querySelector('[class*="user"], [class*="name"], [class*="nick"]')?.innerText?.trim() || '';
-                const avatar = document.querySelector('[class*="avatar"] img')?.src || '';
+                const name = document.querySelector('[class*="user-info"]')?.innerText?.trim() || '';
+                const avatar = document.querySelector('[class*="user-image"]')?.src || '';
                 const plateNumber = '';
                 return { name, avatar, plateNumber };
             })()
