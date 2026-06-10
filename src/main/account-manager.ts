@@ -68,9 +68,6 @@ export class AccountManager {
 
         await loginWin.loadURL(loginHandler.loginUrl);
 
-        // loginWin.on('close', (event) => {
-        //     event.preventDefault();
-        // });
 
         return new Promise((resolve) => {
             const handleLoginSuccess = async () => {
@@ -116,14 +113,18 @@ export class AccountManager {
             };
 
             loginWin.webContents.on('did-navigate', (_event, url) => {
-                if (loginHandler.loginSuccessPatterns.some(pattern => url.includes(pattern))) {
-                    handleLoginSuccess();
+                if (['kuaishou'].includes(platform)) {
+                    if (loginHandler.loginSuccessPatterns.some(pattern => url.includes(pattern))) {
+                        handleLoginSuccess();
+                    }
                 }
             });
 
-            loginWin.webContents.on('did-navigate-in-page', (_event, url) => {
-                if (loginHandler.loginSuccessPatterns.some(pattern => url.includes(pattern))) {
-                    handleLoginSuccess();
+            loginWin.webContents.on('did-navigate-in-page', async (_event, url) => {
+                if (['douyin'].includes(platform)) {
+                    if (loginHandler.loginSuccessPatterns.some(pattern => url.includes(pattern))) {
+                        await handleLoginSuccess();
+                    }
                 }
             });
 

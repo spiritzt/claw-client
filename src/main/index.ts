@@ -6,7 +6,7 @@ import { CookieKeeper } from './cookie-keeper';
 import { registerDomInspector } from './dom-inspector';
 import {exitIconBase64} from "./exitIcon";
 
-const SYSTEM_URL = 'http://localhost';
+const SYSTEM_URL = 'http://localhost/kenClaw';
 
 let mainWindow: BrowserWindow | null = null;
 let tray;

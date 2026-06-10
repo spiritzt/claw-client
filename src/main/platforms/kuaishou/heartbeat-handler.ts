@@ -7,18 +7,11 @@ export class KuaishouHeartbeatChecker implements IHeartbeatChecker {
 
     async checkLoginStatus(win: BrowserWindow): Promise<boolean> {
         await win.loadURL(this.checkUrl);
-        await new Promise(resolve => setTimeout(resolve, 5000));
+        await new Promise(resolve => setTimeout(resolve, 2500));
 
         return await win.webContents.executeJavaScript(`
             (function() {
-                const currentUrl = window.location.href;
-                if (currentUrl.includes('passport') || currentUrl.includes('login')) {
-                    return false;
-                }
-                const hasLoginBtn = !!document.querySelector('[class*="login"]');
-                const hasLoginText = document.body.innerText.includes('登录') &&
-                                     !document.body.innerText.includes('登录过期');
-                return !(hasLoginBtn || hasLoginText);
+                return !document.body.innerText.includes('立即登录');
             })()
         `);
     }
