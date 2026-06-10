@@ -1,6 +1,6 @@
 {
   "name": "claw-client",
-  "version": "1.0.3",
+  "version": "1.0.7",
   "description": "肯登攀-多账号抖音自动发布客户端",
   "main": "dist/main/index.js",
   "scripts": {
