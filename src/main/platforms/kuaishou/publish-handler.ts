@@ -8,10 +8,9 @@ function randomDelay(min: number, max: number): Promise<void> {
 
 const SELECTORS = {
     // 快手的选择器，需要实际探测后更新
-    titleInput: 'input[placeholder*="标题"]',
     videoFileInput: 'input[type="file"][accept*="video"]',
     coverFileInput: 'input[type="file"][accept*="image"]',
-    descriptionEditor: 'textarea',
+    descriptionEditor: 'div#work-description-edit[contenteditable="true"]',
 };
 
 export class KuaishouPublishHandler implements IPublishHandler {
@@ -65,36 +64,18 @@ export class KuaishouPublishHandler implements IPublishHandler {
             await this.waitForUploadComplete(win);
             console.log(`[${accountId}] Upload complete`);
 
-            // ===== 4. 填写标题 =====
-            await randomDelay(1000, 2000);
-            console.log(`[${accountId}] Filling title: ${title}`);
-            await win.webContents.executeJavaScript(`
-                (function() {
-                    const titleInput = document.querySelector(${JSON.stringify(SELECTORS.titleInput)});
-                    if (titleInput) {
-                        const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
-                            window.HTMLInputElement.prototype, 'value'
-                        ).set;
-                        nativeInputValueSetter.call(titleInput, ${JSON.stringify(title)});
-                        titleInput.dispatchEvent(new Event('input', { bubbles: true }));
-                        titleInput.dispatchEvent(new Event('change', { bubbles: true }));
-                        return true;
-                    }
-                    return false;
-                })()
-            `);
-
-            // ===== 5. 填写作品描述 =====
+            // ===== 5. 填写作品描述（包含 tag）=====
             await randomDelay(1000, 2000);
             const desc = description || '';
+            const titleText = title || '';
             const tagText = (tags && tags.length > 0) ? tags.map(t => '#' + t).join(' ') : '';
-            const fullDesc = [desc, tagText].filter(Boolean).join(' ');
+            const fullDesc = [titleText, desc, tagText].filter(Boolean).join(' ');
 
             if (fullDesc) {
                 console.log(`[${accountId}] Filling description: ${fullDesc}`);
                 await win.webContents.executeJavaScript(`
                     (function() {
-                        const editor = document.querySelector(${JSON.stringify(SELECTORS.descriptionEditor)});
+                        const editor = document.querySelector('div#work-description-edit[contenteditable="true"]');
                         if (editor) {
                             editor.focus();
                             document.execCommand('selectAll', false, null);
@@ -139,21 +120,17 @@ export class KuaishouPublishHandler implements IPublishHandler {
             console.log(`[${accountId}] Clicking publish button`);
             const clickResult = await win.webContents.executeJavaScript(`
                 (function() {
-                    const buttons = document.querySelectorAll('button');
+                    // 快手发布按钮是 div，不是 button
+                    const buttons = document.querySelectorAll('div[class*="_button-primary"]');
                     for (const btn of buttons) {
-                        const text = btn.innerText.trim();
-                        if (text === '发布' || text === '发表') {
+                        if (btn.innerText.trim() === '发布') {
                             btn.click();
-                            return { clicked: 'publish', text: text };
+                            return { clicked: 'publish', text: '发布' };
                         }
                     }
                     return { clicked: null, text: '' };
                 })()
             `);
-
-            if (!clickResult.clicked) {
-                return { accountId, success: false, message: '未找到发布按钮' };
-            }
 
             // ===== 7.5 检测短信验证码 =====
             await randomDelay(2000, 3000);
@@ -200,7 +177,7 @@ export class KuaishouPublishHandler implements IPublishHandler {
                 document.body.innerText.substring(0, 1000)
             `);
 
-            const published = pageText.includes('发布成功') || pageText.includes('审核中') || pageText.includes('已提交');
+            const published = pageText.includes('内容发布成功') || pageText.includes('审核中') || pageText.includes('已提交') || pageText.includes('创作首页');
 
             return {
                 accountId,
@@ -221,7 +198,7 @@ export class KuaishouPublishHandler implements IPublishHandler {
             const isComplete = await win.webContents.executeJavaScript(`
                 (function() {
                     const hasReupload = Array.from(document.querySelectorAll('button, span, div')).some(
-                        el => el.innerText.trim() === '重新上传'
+                        el => el.innerText.trim() === '重新上传' || el.innerText.trim() === '重新选择'
                     );
                     return hasReupload;
                 })()
