@@ -5,6 +5,7 @@ import { PublishEngine } from './publish-engine';
 import { CookieKeeper } from './cookie-keeper';
 import { registerDomInspector } from './dom-inspector';
 import {exitIconBase64} from "./exitIcon";
+import { autoUpdater } from "electron-updater";
 
 const SYSTEM_URL = 'http://localhost/kenClaw';
 
@@ -58,6 +59,18 @@ function createMainWindow() {
             mainWindow.hide();
         }
         // 如果标志位为 true，说明是触发了真正的退出流程，放行关闭
+    });
+    setupAutoUpdater();
+}
+
+function setupAutoUpdater() {
+    autoUpdater.checkForUpdatesAndNotify();
+    autoUpdater.on('update-available', () => {
+        console.log('检测到新版本，正在后台下载...');
+    });
+    autoUpdater.on('update-downloaded', () => {
+        console.log('更新下载完成，准备安装');
+        autoUpdater.quitAndInstall();
     });
 }
 
