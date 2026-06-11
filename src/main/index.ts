@@ -7,7 +7,8 @@ import { registerDomInspector } from './dom-inspector';
 import {exitIconBase64} from "./exitIcon";
 import { autoUpdater } from "electron-updater";
 
-const SYSTEM_URL = 'http://localhost/kenClaw';
+// const SYSTEM_URL = 'http://localhost/kenClaw';
+const SYSTEM_URL = 'https://www.kindpo.com/kenClaw';
 
 let mainWindow: BrowserWindow | null = null;
 let tray;
