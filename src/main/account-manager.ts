@@ -91,7 +91,7 @@ export class AccountManager {
                         const ses = session.fromPartition(partition);
                         await ses.clearStorageData();
                         loginWin.close();
-                        resolve({ success: false, message: `${platform} 账号 ${platform === 'kuaishou'? userInfo.name: userInfo.plateNumber} 已存在（账号：${existingAccount.id}），请勿重复添加` });
+                        resolve({ success: false, message: `${platform} 账号 ${userInfo.name} 已存在（账号：${existingAccount.id}），请勿重复添加` });
                         return;
                     }
 
