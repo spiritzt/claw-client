@@ -171,7 +171,7 @@ export class AccountManager {
         if (!account) return null;
 
         const win =  new BrowserWindow({
-            show: true,
+            show: false,
             width: 1200,
             height: 900,
             webPreferences: {
