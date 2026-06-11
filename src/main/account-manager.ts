@@ -76,16 +76,22 @@ export class AccountManager {
                 try {
                     const userInfo = await loginHandler.getUserInfo(loginWin);
 
-                    // 检查抖音号是否已存在
-                    const existingAccount = Array.from(accounts.values()).find(
-                        acc => acc.plateNumber === userInfo.plateNumber && acc.platform === platform
-                    );
+                    let existingAccount;
+                    if (platform === 'kuaishou') {
+                        existingAccount = Array.from(accounts.values()).find(
+                            acc => acc.platform === 'kuaishou' && acc.name === userInfo.name && acc.avatar === userInfo.avatar
+                        );
+                    } else {
+                        existingAccount = Array.from(accounts.values()).find(
+                            acc => acc.plateNumber === userInfo.plateNumber && acc.platform === platform
+                        );
+                    }
 
                     if (existingAccount) {
                         const ses = session.fromPartition(partition);
                         await ses.clearStorageData();
                         loginWin.close();
-                        resolve({ success: false, message: `${platform} 账号 ${userInfo.plateNumber} 已存在（账号：${existingAccount.id}），请勿重复添加` });
+                        resolve({ success: false, message: `${platform} 账号 ${platform === 'kuaishou'? userInfo.name: userInfo.plateNumber} 已存在（账号：${existingAccount.id}），请勿重复添加` });
                         return;
                     }
 
@@ -113,7 +119,7 @@ export class AccountManager {
             };
 
             loginWin.webContents.on('did-navigate', (_event, url) => {
-                if (['kuaishou'].includes(platform)) {
+                if (['kuaishou', 'xiaohongshu'].includes(platform)) {
                     if (loginHandler.loginSuccessPatterns.some(pattern => url.includes(pattern))) {
                         handleLoginSuccess();
                     }
