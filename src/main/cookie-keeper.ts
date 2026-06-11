@@ -69,14 +69,20 @@ export class CookieKeeper {
                 body: `${expiredIds.length} 个账号需要重新扫码登录`,
             }).show();
 
+            // 用 IPC 事件通知前端，替代 executeJavaScript
             const allWindows = BrowserWindow.getAllWindows();
             for (const win of allWindows) {
-                win.webContents.executeJavaScript(`
-                    if (window.clawClient && window.clawClient.onAccountsExpired) {
-                        window.clawClient.onAccountsExpired(${JSON.stringify(expiredIds)});
-                    }
-                `);
+                win.webContents.send('accounts:expired', expiredIds);
             }
+
+            // const allWindows = BrowserWindow.getAllWindows();
+            // for (const win of allWindows) {
+            //     win.webContents.executeJavaScript(`
+            //         if (window.clawClient && window.clawClient.onAccountsExpired) {
+            //             window.clawClient.onAccountsExpired(${JSON.stringify(expiredIds)});
+            //         }
+            //     `);
+            // }
         }
     }
 }

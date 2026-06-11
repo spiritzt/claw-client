@@ -119,12 +119,14 @@ app.whenReady().then(async () => {
             body: `${expired.length} 个抖音账号登录已过期，请重新扫码登录`,
         }).show();
 
+        mainWindow?.webContents.send('accounts:expired', expired.map(r => r.id));
+
         // 通知前端
-        mainWindow?.webContents.executeJavaScript(`
-      if (window.clawClient && window.clawClient.onAccountsExpired) {
-        window.clawClient.onAccountsExpired(${JSON.stringify(expired)});
-      }
-    `);
+        // mainWindow?.webContents.executeJavaScript(`
+        //   if (window.clawClient && window.clawClient.onAccountsExpired) {
+        //     window.clawClient.onAccountsExpired(${JSON.stringify(expired)});
+        //   }
+        // `);
     }
 
     // 启动 Cookie 心跳

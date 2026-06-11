@@ -20,5 +20,15 @@ contextBridge.exposeInMainWorld('clawClient', {
         openCreator: (accountId?: string, platform?: string) => ipcRenderer.invoke('debug:openCreator', accountId, platform),
     },
 
+    onAccountsExpired: (callback: any) => {
+        ipcRenderer.on('accounts:expired', (_, expiredIds) => {
+            callback(expiredIds);
+        });
+    },
+
+    removeAccountsExpiredListener: () => {
+        ipcRenderer.removeAllListeners('accounts:expired');
+    },
+
     isElectron: true,
 });
