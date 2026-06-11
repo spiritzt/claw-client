@@ -171,7 +171,7 @@ export class AccountManager {
         if (!account) return null;
 
         const win =  new BrowserWindow({
-            show: false,
+            show: true,
             width: 1200,
             height: 900,
             webPreferences: {
@@ -217,6 +217,12 @@ export class AccountManager {
             account.lastChecked = Date.now();
             this.saveAccounts();
             return isValid;
+        } catch (e) {
+            console.error(`Check login status failed for ${accountId}:`, e);
+            account.loginValid = false;
+            account.lastChecked = Date.now();
+            this.saveAccounts();
+            return false;
         } finally {
             if (!win.isDestroyed()) win.close();
         }

@@ -7,7 +7,7 @@ function randomDelay(min: number, max: number): Promise<void> {
 }
 
 const SELECTORS = {
-    videoFileInput: 'input[type="file"][accept*="video"]',
+    videoFileInput: 'input.upload-input',
     coverFileInput: 'input[type="file"][accept*="image"]',
     titleInput: 'input[placeholder*="标题"]',
     descriptionEditor: 'div[contenteditable="true"]',
@@ -135,29 +135,47 @@ export class XiaohongshuPublishHandler implements IPublishHandler {
                 `);
             }
 
-            // ===== 7. 点击发布 =====
+            // ===== 7. 点击发布（Electron 原生点击） =====
             await randomDelay(2000, 4000);
             console.log(`[${accountId}] Clicking publish button`);
-            const clickResult = await win.webContents.executeJavaScript(`
+            const pos = await win.webContents.executeJavaScript(`
                 (function() {
-                    const buttons = document.querySelectorAll('button');
-                    for (const btn of buttons) {
-                        const text = btn.innerText.trim();
-                        if (text === '发布') {
-                            btn.click();
-                            return { clicked: 'publish', text: text };
-                        }
-                    }
-                    return { clicked: null, text: '' };
+                    const btn = document.querySelector('xhs-publish-btn');
+                    if (!btn) return null;
+                    const rect = btn.getBoundingClientRect();
+                    // 两个按钮居中，gap 24px，各 120px 宽
+                    // 发布按钮中心 = 条中心 + 72
+                    const centerX = rect.left + rect.width / 2;
+                    const centerY = rect.top + rect.height / 2;
+                    return {
+                        x: centerX + 72,
+                        y: centerY
+                    };
                 })()
             `);
 
-            if (!clickResult.clicked) {
+            if (!pos) {
                 return { accountId, success: false, message: '未找到发布按钮' };
             }
 
+            win.webContents.sendInputEvent({
+                type: 'mouseDown',
+                x: Math.round(pos.x),
+                y: Math.round(pos.y),
+                button: 'left',
+                clickCount: 1
+            });
+            await new Promise(r => setTimeout(r, 50));
+            win.webContents.sendInputEvent({
+                type: 'mouseUp',
+                x: Math.round(pos.x),
+                y: Math.round(pos.y),
+                button: 'left',
+                clickCount: 1
+            });
+
             // ===== 7.5 检测短信验证码 =====
-            await randomDelay(2000, 3000);
+            await randomDelay(1500, 2000);
             const needVerify = await win.webContents.executeJavaScript(`
                 (function() {
                     const bodyText = document.body.innerText;
@@ -196,12 +214,17 @@ export class XiaohongshuPublishHandler implements IPublishHandler {
             }
 
             // ===== 8. 等待发布结果 =====
-            await randomDelay(5000, 8000);
-            const pageText = await win.webContents.executeJavaScript(`
-                document.body.innerText.substring(0, 1000)
-            `);
-
-            const published = pageText.includes('发布成功') || pageText.includes('审核中') || pageText.includes('已提交');
+            let published = false;
+            const maxWait = 5000;
+            const startTime = Date.now();
+            while (Date.now() - startTime < maxWait) {
+                const currentUrl = win.webContents.getURL();
+                if (currentUrl.includes('success')) {
+                    published = true;
+                    break;
+                }
+                await new Promise(r => setTimeout(r, 1000));
+            }
 
             return {
                 accountId,

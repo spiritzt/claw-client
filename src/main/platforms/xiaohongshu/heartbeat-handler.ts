@@ -12,10 +12,8 @@ export class XiaohongshuHeartbeatChecker implements IHeartbeatChecker {
         return await win.webContents.executeJavaScript(`
             (function() {
                 const url = window.location.href;
-                const onLoginPage = url.includes('login') || url.includes('passport');
-                const hasLoginText = document.body.innerText.includes('登录') &&
-                                     !document.body.innerText.includes('登录过期');
-                return !(onLoginPage || hasLoginText);
+                const onLoginPage = url.includes('login');
+                return !onLoginPage;
             })()
         `);
     }
