@@ -153,8 +153,8 @@ app.on('before-quit', () => {
 
 // ========== IPC 通信 ==========
 
-ipcMain.handle('account:init', async (_, accountId: string, typeName: string, nickName: string, platform: string) => {
-    return accountManager.initAccount(accountId, typeName, nickName, platform as any);
+ipcMain.handle('account:init', async (_, accountId: string, typeName: string, nickName: string, platform: string, groupName: string) => {
+    return accountManager.initAccount(accountId, typeName, nickName, platform as any, groupName);
 });
 
 ipcMain.handle('account:setGroup', async (_, accountId: string, typeName: string) => {

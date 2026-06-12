@@ -2,7 +2,7 @@ import { contextBridge, ipcRenderer } from 'electron';
 
 contextBridge.exposeInMainWorld('clawClient', {
     account: {
-        init: (accountId: string, typeName: string, nickName: string, platform: string) => ipcRenderer.invoke('account:init', accountId, typeName, nickName, platform),
+        init: (accountId: string, typeName: string, nickName: string, platform: string, groupName: string) => ipcRenderer.invoke('account:init', accountId, typeName, nickName, platform, groupName),
         setGroup: (accountId: string, typeName: string) => ipcRenderer.invoke('account:setGroup', accountId, typeName),
         list: () => ipcRenderer.invoke('account:list'),
         remove: (accountId: string) => ipcRenderer.invoke('account:remove', accountId),

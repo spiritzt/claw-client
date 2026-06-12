@@ -36,7 +36,7 @@ export class AccountManager {
     /**
      * 初始化账号 - 弹出扫码登录窗口
      */
-    async initAccount(accountId: string, typeName: string, nickName: string, platform: PlatformType): Promise<{ success: boolean; message: string }> {
+    async initAccount(accountId: string, typeName: string, nickName: string, platform: PlatformType, groupName: string): Promise<{ success: boolean; message: string }> {
         if (accounts.has(accountId)) {
             return { success: false, message: '账号已存在' };
         }
@@ -99,7 +99,7 @@ export class AccountManager {
                         id: accountId,
                         name: userInfo.name,
                         plateNumber: userInfo.plateNumber,
-                        grouping: "0:默认分组",
+                        grouping: groupName,
                         nickname: nickName,
                         typename: typeName,
                         avatar: userInfo.avatar,
@@ -157,7 +157,7 @@ export class AccountManager {
         accounts.delete(accountId);
         this.saveAccounts();
 
-        const result = await this.initAccount(accountId, typeName, nickName, backup.platform);
+        const result = await this.initAccount(accountId, typeName, nickName, backup.platform, backup.grouping);
 
         if (!result.success) {
             accounts.set(accountId, backup);
