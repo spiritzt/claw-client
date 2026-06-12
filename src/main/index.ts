@@ -7,8 +7,8 @@ import { registerDomInspector } from './dom-inspector';
 import {exitIconBase64} from "./exitIcon";
 import { autoUpdater } from "electron-updater";
 
-// const SYSTEM_URL = 'http://localhost/kenClaw';
-const SYSTEM_URL = 'https://www.kindpo.com/kenClaw';
+const SYSTEM_URL = 'http://localhost/kenClaw';
+// const SYSTEM_URL = 'https://www.kindpo.com/kenClaw';
 
 let mainWindow: BrowserWindow | null = null;
 let tray;
@@ -155,6 +155,10 @@ app.on('before-quit', () => {
 
 ipcMain.handle('account:init', async (_, accountId: string, typeName: string, nickName: string, platform: string) => {
     return accountManager.initAccount(accountId, typeName, nickName, platform as any);
+});
+
+ipcMain.handle('account:setGroup', async (_, accountId: string, typeName: string) => {
+    return accountManager.setGroup(accountId, typeName);
 });
 
 ipcMain.handle('account:reLogin', async (_, accountId: string, typeName: string, nickName: string) => {

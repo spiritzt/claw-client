@@ -10,6 +10,7 @@ export interface AccountInfo {
     nickname: string;
     typename: string;
     avatar: string;
+    grouping: string;
     partition: string;
     platform: PlatformType;
     loginValid: boolean;

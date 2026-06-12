@@ -99,6 +99,7 @@ export class AccountManager {
                         id: accountId,
                         name: userInfo.name,
                         plateNumber: userInfo.plateNumber,
+                        grouping: "0:默认分组",
                         nickname: nickName,
                         typename: typeName,
                         avatar: userInfo.avatar,
@@ -239,6 +240,14 @@ export class AccountManager {
 
     getAccount(accountId: string): AccountInfo | undefined {
         return accounts.get(accountId);
+    }
+
+    setGroup(accountId: string, groupString: string): void {
+        let account: AccountInfo | undefined = accounts.get(accountId);
+        if (account) {
+            account.grouping = groupString;
+            accounts.set(accountId, account);
+        }
     }
 
     listAccounts(): AccountInfo[] {
