@@ -1,7 +1,7 @@
 import { BrowserWindow } from 'electron';
 
 // ========== 账号信息 ==========
-export type PlatformType = 'douyin' | 'kuaishou' | 'xiaohongshu';
+export type PlatformType = 'douyin' | 'kuaishou' | 'xiaohongshu' | 'shipinhao';
 
 export interface AccountInfo {
     id: string;

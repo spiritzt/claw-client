@@ -60,7 +60,7 @@ export class AccountManager {
         loginWin.maximize();
         loginWin.show();
 
-        if (platform === 'kuaishou') {
+        if (['kuaishou', 'shipinhao'].includes(platform)) {
             loginWin.webContents.setUserAgent(
                 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
             );
@@ -120,7 +120,7 @@ export class AccountManager {
             };
 
             loginWin.webContents.on('did-navigate', (_event, url) => {
-                if (['kuaishou', 'xiaohongshu'].includes(platform)) {
+                if (['kuaishou', 'xiaohongshu', 'shipinhao'].includes(platform)) {
                     if (loginHandler.loginSuccessPatterns.some(pattern => url.includes(pattern))) {
                         handleLoginSuccess();
                     }
@@ -183,7 +183,7 @@ export class AccountManager {
         });
 
         // 伪装 User-Agent
-        if (account.platform === 'kuaishou') {
+        if (['kuaishou', 'shipinhao'].includes(account.platform)) {
             win.webContents.setUserAgent(
                 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
             );

@@ -8,29 +8,36 @@ import { KuaishouHeartbeatChecker } from './kuaishou/heartbeat-handler';
 import { XiaohongshuLoginHandler } from './xiaohongshu/login-handler';
 import { XiaohongshuPublishHandler } from './xiaohongshu/publish-handler';
 import { XiaohongshuHeartbeatChecker } from './xiaohongshu/heartbeat-handler';
+import { ShipinhaoLoginHandler } from './shipinhao/login-handler';
+import { ShipinhaoPublishHandler } from './shipinhao/publish-handler';
+import { ShipinhaoHeartbeatChecker } from './shipinhao/heartbeat-handler';
 
 const loginHandlers: Record<string, ILoginHandler> = {
     douyin: new DouyinLoginHandler(),
     kuaishou: new KuaishouLoginHandler(),
-    xiaohongshu: new XiaohongshuLoginHandler()
+    xiaohongshu: new XiaohongshuLoginHandler(),
+    shipinhao: new ShipinhaoLoginHandler()
 };
 
 const publishHandlers: Record<string, IPublishHandler> = {
     douyin: new DouyinPublishHandler(),
     kuaishou: new KuaishouPublishHandler(),
-    xiaohongshu: new XiaohongshuPublishHandler()
+    xiaohongshu: new XiaohongshuPublishHandler(),
+    shipinhao: new ShipinhaoPublishHandler()
 };
 
 const heartbeatCheckers: Record<string, IHeartbeatChecker> = {
     douyin: new DouyinHeartbeatChecker(),
     kuaishou: new KuaishouHeartbeatChecker(),
-    xiaohongshu: new XiaohongshuHeartbeatChecker()
+    xiaohongshu: new XiaohongshuHeartbeatChecker(),
+    shipinhao: new ShipinhaoHeartbeatChecker()
 };
 
 const partitionPrefixes: Record<PlatformType, string> = {
     douyin: 'dy',
     kuaishou: 'ks',
-    xiaohongshu: 'xhs'
+    xiaohongshu: 'xhs',
+    shipinhao: 'sph'
 };
 
 export function getLoginHandler(platform: PlatformType): ILoginHandler {

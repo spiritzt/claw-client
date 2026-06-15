@@ -44,7 +44,7 @@ export class CookieKeeper {
 
                 // 伪装 User-Agent
                 // 只有快手需要伪装
-                if (account.platform === 'kuaishou') {
+                if (['kuaishou', 'shipinhao'].includes(account.platform)) {
                     win.webContents.setUserAgent(
                         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
                     );

@@ -9,13 +9,15 @@ export function registerDomInspector(): void {
         const urls: Record<string, string> = {
             douyin: 'https://creator.douyin.com/creator-micro/content/publish',
             kuaishou: 'https://cp.kuaishou.com/profile',
-            xiaohongshu: 'https://creator.xiaohongshu.com/new/home'
+            xiaohongshu: 'https://creator.xiaohongshu.com/new/home',
+            shipinhao: 'https://channels.weixin.qq.com/platform/post/create'
         };
 
         const prefixes: Record<string, string> = {
             douyin: 'dy',
             kuaishou: 'ks',
             xiaohongshu: 'xhs',
+            shipinhao: 'sph',
         };
 
         const win = new BrowserWindow({
