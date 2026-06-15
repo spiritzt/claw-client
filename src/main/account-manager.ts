@@ -181,6 +181,7 @@ export class AccountManager {
                 nodeIntegration: false,
             },
         });
+        win.webContents.setAudioMuted(true);
 
         // 伪装 User-Agent
         if (['kuaishou', 'shipinhao'].includes(account.platform)) {
