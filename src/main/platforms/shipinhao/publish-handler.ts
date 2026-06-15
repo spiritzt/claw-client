@@ -6,27 +6,23 @@ function randomDelay(min: number, max: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, delay));
 }
 
-const SELECTORS = {
-    videoFileInput: 'input.upload-input',
-    coverFileInput: 'input[type="file"][accept*="image"]',
-    titleInput: 'input[placeholder*="标题"]',
-    descriptionEditor: 'div[contenteditable="true"]',
-};
+// 微信用 wujie 微前端，所有元素在 Shadow DOM 里
+const SHADOW_SELECTOR = `document.querySelector('wujie-app')?.shadowRoot`;
 
 export class ShipinhaoPublishHandler implements IPublishHandler {
     platform: PlatformType = 'shipinhao';
     publishUrl = 'https://channels.weixin.qq.com/platform/post/create';
 
     async publishVideo(accountId: string, win: BrowserWindow, task: PublishTask): Promise<PublishResult> {
-        const { videoUrl, title, description, tags, coverUrl } = task;
+        const { videoUrl, title, description, tags } = task;
 
         try {
             // ===== 1. 打开发布页 =====
             await win.loadURL(this.publishUrl);
-            await randomDelay(3000, 5000);
+            await randomDelay(6000, 7000);
 
             const currentUrl = win.webContents.getURL();
-            if (currentUrl.includes('login') || currentUrl.includes('passport')) {
+            if (currentUrl.includes('login')) {
                 return { accountId, success: false, message: '登录已过期，请重新扫码登录' };
             }
 
@@ -35,12 +31,15 @@ export class ShipinhaoPublishHandler implements IPublishHandler {
             const uploadResult = await win.webContents.executeJavaScript(`
                 (async function() {
                     try {
+                        const shadow = ${SHADOW_SELECTOR};
+                        if (!shadow) return { success: false, message: 'Shadow DOM 未就绪' };
+ 
                         const response = await fetch(${JSON.stringify(videoUrl)});
                         if (!response.ok) return { success: false, message: '视频下载失败: ' + response.status };
                         const blob = await response.blob();
                         const file = new File([blob], 'video.mp4', { type: 'video/mp4' });
  
-                        const fileInput = document.querySelector(${JSON.stringify(SELECTORS.videoFileInput)});
+                        const fileInput = shadow.querySelector('input[type="file"][accept*="video"]');
                         if (!fileInput) return { success: false, message: '未找到视频上传控件' };
  
                         const dataTransfer = new DataTransfer();
@@ -64,172 +63,91 @@ export class ShipinhaoPublishHandler implements IPublishHandler {
             await this.waitForUploadComplete(win);
             console.log(`[${accountId}] Upload complete`);
 
-            // ===== 4. 填写标题 =====
+            function cleanTitle(title: string): string {
+                // 去掉所有标点符号，用空格替代
+                return title.replace(/[^\w\u4e00-\u9fff]/g, ' ').replace(/\s+/g, ' ').trim();
+            }
+
+            // ===== 4. 填写短标题 =====
             await randomDelay(1000, 2000);
             if (title) {
-                console.log(`[${accountId}] Filling title: ${title}`);
+                const shortTitle = cleanTitle(title);
+                console.log(`[${accountId}] Filling short title: ${shortTitle}`);
                 await win.webContents.executeJavaScript(`
-                    (function() {
-                        const titleInput = document.querySelector(${JSON.stringify(SELECTORS.titleInput)});
-                        if (titleInput) {
-                            const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
-                                window.HTMLInputElement.prototype, 'value'
-                            ).set;
-                            nativeInputValueSetter.call(titleInput, ${JSON.stringify(title)});
-                            titleInput.dispatchEvent(new Event('input', { bubbles: true }));
-                            titleInput.dispatchEvent(new Event('change', { bubbles: true }));
-                            return true;
-                        }
-                        return false;
+                    (async function() {
+                        const shadow = ${SHADOW_SELECTOR};
+                        const titleInput = shadow?.querySelector('input[placeholder*="填写短标题有机会获得更多流量"]');
+                        if (!titleInput) return false;
+                        titleInput.click();
+                        titleInput.focus();
+                        await new Promise(r => setTimeout(r, 300));
+                        const nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+                        nativeSetter.call(titleInput, ${JSON.stringify(shortTitle)});
+                        titleInput.dispatchEvent(new Event('input', { bubbles: true }));
+                        titleInput.dispatchEvent(new Event('change', { bubbles: true }));
+                        return true;
                     })()
                 `);
             }
 
-            // ===== 5. 填写作品描述 =====
+            // ===== 5. 填写作品描述（标题 + 话题） =====
             await randomDelay(1000, 2000);
-            const desc = description || '';
             const tagText = (tags && tags.length > 0) ? tags.map(t => '#' + t).join(' ') : '';
-            const fullDesc = [desc, tagText].filter(Boolean).join(' ');
+            const fullDesc = [title || '', tagText].filter(Boolean).join(' ');
 
             if (fullDesc) {
                 console.log(`[${accountId}] Filling description: ${fullDesc}`);
                 await win.webContents.executeJavaScript(`
-                    (function() {
-                        const editor = document.querySelector(${JSON.stringify(SELECTORS.descriptionEditor)});
-                        if (editor) {
-                            editor.focus();
-                            document.execCommand('selectAll', false, null);
-                            document.execCommand('insertText', false, ${JSON.stringify(fullDesc)});
-                            return true;
-                        }
-                        return false;
-                    })()
-                `);
-            }
-
-            // ===== 6. 上传封面（可选） =====
-            if (coverUrl) {
-                await randomDelay(1000, 2000);
-                console.log(`[${accountId}] Uploading cover: ${coverUrl}`);
-                await win.webContents.executeJavaScript(`
                     (async function() {
-                        try {
-                            const response = await fetch(${JSON.stringify(coverUrl)});
-                            if (!response.ok) return { success: false };
-                            const blob = await response.blob();
-                            const file = new File([blob], 'cover.jpg', { type: blob.type || 'image/jpeg' });
- 
-                            const fileInput = document.querySelector(${JSON.stringify(SELECTORS.coverFileInput)});
-                            if (!fileInput) return { success: false };
- 
-                            const dataTransfer = new DataTransfer();
-                            dataTransfer.items.add(file);
-                            fileInput.files = dataTransfer.files;
-                            fileInput.dispatchEvent(new Event('change', { bubbles: true }));
- 
-                            return { success: true };
-                        } catch (e) {
-                            return { success: false, message: e.message };
-                        }
+                        const shadow = ${SHADOW_SELECTOR};
+                        const editor = shadow?.querySelector('.post-desc-box .input-editor');
+                        if (!editor) return false;
+                        editor.click();
+                        editor.focus();
+                        await new Promise(r => setTimeout(r, 500));
+                        document.execCommand('selectAll', false, null);
+                        document.execCommand('insertText', false, ${JSON.stringify(fullDesc)});
+                        return true;
                     })()
                 `);
             }
 
-            // ===== 7. 点击发布（Electron 原生点击） =====
+            // ===== 6. 点击发表 =====
             await randomDelay(2000, 4000);
             console.log(`[${accountId}] Clicking publish button`);
-            const pos = await win.webContents.executeJavaScript(`
+            const clickResult = await win.webContents.executeJavaScript(`
                 (function() {
-                    const btn = document.querySelector('xhs-publish-btn');
-                    if (!btn) return null;
-                    const rect = btn.getBoundingClientRect();
-                    // 两个按钮居中，gap 24px，各 120px 宽
-                    // 发布按钮中心 = 条中心 + 72
-                    const centerX = rect.left + rect.width / 2;
-                    const centerY = rect.top + rect.height / 2;
-                    return {
-                        x: centerX + 72,
-                        y: centerY
-                    };
-                })()
-            `);
-
-            if (!pos) {
-                return { accountId, success: false, message: '未找到发布按钮' };
-            }
-
-            win.webContents.sendInputEvent({
-                type: 'mouseDown',
-                x: Math.round(pos.x),
-                y: Math.round(pos.y),
-                button: 'left',
-                clickCount: 1
-            });
-            await new Promise(r => setTimeout(r, 50));
-            win.webContents.sendInputEvent({
-                type: 'mouseUp',
-                x: Math.round(pos.x),
-                y: Math.round(pos.y),
-                button: 'left',
-                clickCount: 1
-            });
-
-            // ===== 7.5 检测短信验证码 =====
-            await randomDelay(1500, 2000);
-            const needVerify = await win.webContents.executeJavaScript(`
-                (function() {
-                    const bodyText = document.body.innerText;
-                    return bodyText.includes('验证码') || 
-                           bodyText.includes('短信验证') || 
-                           bodyText.includes('确认本人操作');
-                })()
-            `);
-
-            if (needVerify) {
-                console.log(`[${accountId}] Need SMS verification, showing window...`);
-                win.show();
-                win.focus();
-
-                await new Promise<void>((resolve) => {
-                    const checkInterval = setInterval(async () => {
-                        const stillNeed = await win.webContents.executeJavaScript(`
-                            (function() {
-                                const bodyText = document.body.innerText;
-                                return bodyText.includes('验证码') || 
-                                       bodyText.includes('短信验证') || 
-                                       bodyText.includes('确认本人操作');
-                            })()
-                        `);
-
-                        if (!stillNeed) {
-                            console.log(`[${accountId}] Verification completed`);
-                            win.hide();
-                            clearInterval(checkInterval);
-                            resolve();
+                    const shadow = document.querySelector('wujie-app')?.shadowRoot;
+                    if (!shadow) return { clicked: null, text: 'shadow not found' };
+                    const buttons = shadow.querySelectorAll('button');
+                    for (const btn of buttons) {
+                        if (btn.innerText.trim() === '发表') {
+                            if (btn.classList.contains('weui-desktop-btn_disabled')) {
+                                return { clicked: null, text: 'disabled' };
+                            }
+                            btn.click();
+                            return { clicked: 'publish', text: '发表' };
                         }
-                    }, 2000);
-                });
+                    }
+                    return { clicked: null, text: 'not found' };
+                })()
+            `);
 
-                await randomDelay(2000, 3000);
-            }
+            // ===== 7. 等待发布结果 =====
+            await randomDelay(5000, 8000);
+            const pageText = await win.webContents.executeJavaScript(`
+                (function() {
+                    const shadow = ${SHADOW_SELECTOR};
+                    return (shadow?.body?.innerText || document.body.innerText).substring(0, 1000);
+                })()
+            `);
 
-            // ===== 8. 等待发布结果 =====
-            let published = false;
-            const maxWait = 5000;
-            const startTime = Date.now();
-            while (Date.now() - startTime < maxWait) {
-                const currentUrl = win.webContents.getURL();
-                if (currentUrl.includes('success')) {
-                    published = true;
-                    break;
-                }
-                await new Promise(r => setTimeout(r, 1000));
-            }
+            const published = pageText.includes('已发表') || pageText.includes('发表成功') || pageText.includes('审核中') || pageText.includes('已提交');
 
             return {
                 accountId,
                 success: published,
-                message: published ? '发布成功，视频进入审核' : '发布状态未知，请检查创作者中心',
+                message: published ? '发布成功，视频进入审核' : '发布状态未知，请检查视频号管理平台',
             };
 
         } catch (error: any) {
@@ -244,10 +162,12 @@ export class ShipinhaoPublishHandler implements IPublishHandler {
         while (Date.now() - startTime < maxWaitTime) {
             const isComplete = await win.webContents.executeJavaScript(`
                 (function() {
-                    const hasReupload = Array.from(document.querySelectorAll('button, span, div')).some(
-                        el => el.innerText.trim() === '重新上传' || el.innerText.trim() === '重新选择'
+                    const shadow = document.querySelector('wujie-app')?.shadowRoot;
+                    if (!shadow) return false;
+                    const hasDelete = Array.from(shadow.querySelectorAll('div, button, span')).some(
+                        el => el.innerText.trim() === '删除'
                     );
-                    return hasReupload;
+                    return hasDelete;
                 })()
             `);
 
