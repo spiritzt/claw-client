@@ -6,7 +6,11 @@ export class ShipinhaoHeartbeatChecker implements IHeartbeatChecker {
     checkUrl = 'https://channels.weixin.qq.com/platform';
 
     async checkLoginStatus(win: BrowserWindow): Promise<boolean> {
-        await win.loadURL(this.checkUrl);
+        try {
+            await win.loadURL(this.checkUrl);
+        } catch (e) {
+            console.log('loadURL failed, checking URL anyway');
+        }
         await new Promise(resolve => setTimeout(resolve, 7000));
 
         return await win.webContents.executeJavaScript(`
