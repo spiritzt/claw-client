@@ -11,10 +11,8 @@ export class DouyinHeartbeatChecker implements IHeartbeatChecker {
 
         return await win.webContents.executeJavaScript(`
             (function() {
-                const hasLoginBtn = !!document.querySelector('[class*="login"]');
-                const hasLoginText = document.body.innerText.includes('登录') &&
-                                     !document.body.innerText.includes('登录过期');
-                return !(hasLoginBtn || hasLoginText);
+                const hasLoginText = document.body.innerText.includes('扫码登录')
+                return !hasLoginText;
             })()
         `);
     }
