@@ -7,7 +7,7 @@ export class XiaohongshuHeartbeatChecker implements IHeartbeatChecker {
 
     async checkLoginStatus(win: BrowserWindow): Promise<boolean> {
         await win.loadURL(this.checkUrl);
-        await new Promise(resolve => setTimeout(resolve, 3000));
+        await new Promise(resolve => setTimeout(resolve, 5000));
 
         return await win.webContents.executeJavaScript(`
             (function() {
